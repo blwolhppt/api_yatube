@@ -1,21 +1,37 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, permissions
 
+from .permissions import IsAuthorOrReadOnly
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
-from yatube_api.posts.models import Group, Post
+from posts.models import Group, Post
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    permission_classes = (permissions.IsAuthenticated, IsAuthorOrReadOnly)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
-class GroupViewSet(viewsets.ModelViewSet):
-    pass
+class GroupViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    pass
+    serializer_class = CommentSerializer
+    permission_classes = (permissions.IsAuthenticated, IsAuthorOrReadOnly)
+
+    def get_queryset(self):
+        pk_post = self.kwargs.get('post_id')
+        post = get_object_or_404(Post, pk=pk_post)
+        post_comments = post.comments
+        return post_comments
+
+    def perform_create(self, serializer):
+        pk_post = self.kwargs.get('post_id')
+        post = get_object_or_404(Post, pk=pk_post)
+        serializer.save(author=self.request.user, post=post)

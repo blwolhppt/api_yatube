@@ -1,25 +1,28 @@
 from rest_framework import serializers
-from yatube_api.posts.models import Post, Group, Comment
+
+from posts.models import Comment, Group, Post
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    author = serializers.SlugRelatedField(read_only=True,
+                                          slug_field='username')
 
     class Meta:
-        fields = '__all__'
         model = Post
+        fields = '__all__'
 
 
 class GroupSerializer(serializers.ModelSerializer):
-
     class Meta:
-        fields = '__all__'
         model = Group
+        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    author = serializers.SlugRelatedField(read_only=True,
+                                          slug_field='username')
+    post = serializers.SlugRelatedField(read_only=True, slug_field='id')
 
     class Meta:
-        fields = '__all__'
         model = Comment
+        fields = '__all__'
