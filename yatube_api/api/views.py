@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions
 
-from .permissions import IsAuthorOrReadOnly
-from .serializers import CommentSerializer, GroupSerializer, PostSerializer
+from api.permissions import IsAuthorOrReadOnly
+from api.serializers import CommentSerializer, GroupSerializer, PostSerializer
 from posts.models import Group, Post
 
 
@@ -28,8 +28,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         pk_post = self.kwargs.get('post_id')
         post = get_object_or_404(Post, pk=pk_post)
-        post_comments = post.comments
-        return post_comments
+        return post.comments
 
     def perform_create(self, serializer):
         pk_post = self.kwargs.get('post_id')
